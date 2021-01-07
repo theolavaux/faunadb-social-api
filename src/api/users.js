@@ -7,7 +7,6 @@ const router = express.Router();
 
 const {
   Paginate,
-  Documents,
   Collection,
   Lambda,
   Get,
@@ -21,15 +20,14 @@ const {
 
 // GET all users
 router.get('/', async (_, res, next) => {
-  // Lambda('user', Select('data', Get(Var('user'))))
   try {
-    const users = await db.get().query(
+    const { data } = await db.get().query(
       Map(
-        Paginate(Documents(Collection('users'))),
+        Paginate(Match(Index('all_users'))),
         Lambda((user) => Get(user))
       )
     );
-    res.send(users);
+    res.send(data);
   } catch (e) {
     next(e);
   }
@@ -38,11 +36,10 @@ router.get('/', async (_, res, next) => {
 // GET user by id
 router.get('/:id', async (req, res, next) => {
   try {
-    const user = await db
+    const { data } = await db
       .get()
       .query(Get(Ref(Collection('users'), req.params.id)));
-
-    res.send(user);
+    res.send(data);
   } catch (e) {
     next(e);
   }
@@ -51,13 +48,13 @@ router.get('/:id', async (req, res, next) => {
 // GET posts by user
 router.get('/:id/posts', async (req, res, next) => {
   try {
-    const posts = await db.get().query(
+    const { data } = await db.get().query(
       Map(
         Paginate(Match(Index('posts_by_user'), req.params.id)),
         Lambda((post) => Get(post))
       )
     );
-    res.send(posts);
+    res.send(data);
   } catch (e) {
     next(e);
   }
@@ -66,10 +63,13 @@ router.get('/:id/posts', async (req, res, next) => {
 // GET comments by user
 router.get('/:id/comments', async (req, res, next) => {
   try {
-    const comments = await db
-      .get()
-      .query(Paginate(Match(Index('comments_by_user'), req.params.id)));
-    res.send(comments);
+    const { data } = await db.get().query(
+      Map(
+        Paginate(Match(Index('comments_by_user'), req.params.id)),
+        Lambda((post) => Get(post))
+      )
+    );
+    res.send(data);
   } catch (e) {
     next(e);
   }
