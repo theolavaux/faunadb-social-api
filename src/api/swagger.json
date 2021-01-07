@@ -1,0 +1,394 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Social media API",
+    "description": "Social media Node.js API with FaunaDB",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "localhost:5000",
+  "basePath": "/api/v1",
+  "tags": [
+    {
+      "name": "Users",
+      "description": "API for users"
+    },
+    {
+      "name": "Posts",
+      "description": "API for posts"
+    },
+    {
+      "name": "Comments",
+      "description": "API for comments"
+    }
+  ],
+  "schemes": ["http"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all users",
+        "responses": {
+          "200": {
+            "description": "User is found"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create a new user",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "description": "Name of the user that we want to create",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": true
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "New user is created"
+          }
+        }
+      }
+    },
+    "/users/{userId}": {
+      "parameters": [
+        {
+          "name": "userId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the user that we want to find",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user with given ID",
+        "responses": {
+          "200": {
+            "description": "User is found"
+          }
+        }
+      }
+    },
+    "/users/{userId}/posts": {
+      "parameters": [
+        {
+          "name": "userId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the user that we want to find",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get posts from a user with given ID",
+        "responses": {
+          "200": {
+            "description": "User is found"
+          }
+        }
+      }
+    },
+    "/users/{userId}/comments": {
+      "parameters": [
+        {
+          "name": "userId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the user that we want to find",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get comments from a user with given ID",
+        "responses": {
+          "200": {
+            "description": "User is found"
+          }
+        }
+      }
+    },
+    "/posts": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "Get all posts",
+        "responses": {
+          "200": {
+            "description": "Post is found"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Posts"],
+        "summary": "Create a new post",
+        "parameters": [
+          {
+            "name": "postAuthorId",
+            "in": "body",
+            "description": "Id of the user that created the post",
+            "properties": {
+              "postAuthorId": {
+                "type": "string"
+              }
+            },
+            "required": true
+          },
+          {
+            "name": "title",
+            "in": "body",
+            "description": "Title of the post",
+            "properties": {
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": true
+          },
+          {
+            "name": "content",
+            "in": "body",
+            "description": "Content of the post",
+            "properties": {
+              "content": {
+                "type": "string"
+              }
+            },
+            "required": true
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "New user is created"
+          }
+        }
+      }
+    },
+    "/posts/{postId}": {
+      "parameters": [
+        {
+          "name": "postId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the post that we want to find",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": ["Posts"],
+        "summary": "Get post with given ID",
+        "responses": {
+          "200": {
+            "description": "Post is found"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Posts"],
+        "summary": "Update post with given ID",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "body",
+            "description": "Title of the post",
+            "properties": {
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": true
+          },
+          {
+            "name": "content",
+            "in": "body",
+            "description": "Content of the post",
+            "properties": {
+              "content": {
+                "type": "string"
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post is updated"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Posts"],
+        "summary": "Delete post with given ID",
+        "responses": {
+          "200": {
+            "description": "Post is deleted"
+          }
+        }
+      }
+    },
+    "/posts/{postId}/comments": {
+      "parameters": [
+        {
+          "name": "postId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the post that we want to find",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": ["Posts"],
+        "summary": "Get comments from post with given ID",
+        "responses": {
+          "200": {
+            "description": "Post is found"
+          }
+        }
+      }
+    },
+    "/comments": {
+      "get": {
+        "tags": ["Comments"],
+        "summary": "Get all comments",
+        "responses": {
+          "200": {
+            "description": "Comment is found"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Comments"],
+        "summary": "Create a new comment",
+        "parameters": [
+          {
+            "name": "commentAuthorId",
+            "in": "body",
+            "description": "Id of the user that created the comment",
+            "properties": {
+              "commentAuthorId": {
+                "type": "string"
+              }
+            },
+            "required": true
+          },
+          {
+            "name": "targetPostId",
+            "in": "body",
+            "description": "Id of the post that holds this comment",
+            "properties": {
+              "targetPostId": {
+                "type": "string"
+              }
+            },
+            "required": true
+          },
+          {
+            "name": "title",
+            "in": "body",
+            "description": "Title of the comment",
+            "properties": {
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": true
+          },
+          {
+            "name": "content",
+            "in": "body",
+            "description": "Content of the comment",
+            "properties": {
+              "content": {
+                "type": "string"
+              }
+            },
+            "required": true
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "New user is created"
+          }
+        }
+      }
+    },
+    "/comment/{commentId}": {
+      "parameters": [
+        {
+          "name": "commentId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the comment that we want to find",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": ["Comments"],
+        "summary": "Get comment with given ID",
+        "responses": {
+          "200": {
+            "description": "Comment is found"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Comments"],
+        "summary": "Update comment with given ID",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "body",
+            "description": "Title of the comment",
+            "properties": {
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": true
+          },
+          {
+            "name": "content",
+            "in": "body",
+            "description": "Content of the comment",
+            "properties": {
+              "content": {
+                "type": "string"
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comment is updated"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Comments"],
+        "summary": "Delete comment with given ID",
+        "responses": {
+          "200": {
+            "description": "Comment is deleted"
+          }
+        }
+      }
+    }
+  }
+}
