@@ -1,5 +1,6 @@
 const express = require('express');
 const faunadb = require('faunadb');
+const joi = require('joi');
 
 const db = require('../database');
 
@@ -8,7 +9,6 @@ const router = express.Router();
 const {
   Paginate,
   Collection,
-  Lambda,
   Get,
   Update,
   Delete,
@@ -18,17 +18,16 @@ const {
   Match,
   Index,
   Map,
+  Drop,
+  Intersection,
 } = faunadb.query;
 
 // GET all posts
 router.get('/', async (_, res, next) => {
   try {
-    const { data } = await db.get().query(
-      Map(
-        Paginate(Match(Index('all_posts'))),
-        Lambda((post) => Get(post))
-      )
-    );
+    const { data } = await db
+      .get()
+      .query(Map(Paginate(Match(Index('all_posts'))), (post) => Get(post)));
     res.send(data);
   } catch (e) {
     next(e);
@@ -51,10 +50,42 @@ router.get('/:id', async (req, res, next) => {
 // GET comments by post
 router.get('/:id/comments', async (req, res, next) => {
   try {
+    const limit = parseInt(req.query.limit, 10);
+    const offset = parseInt(req.query.offset, 10) || 0;
+
+    const { commentAuthor, title, content } = req.query;
+
+    let size;
+    if (!limit) {
+      size = undefined;
+    } else if (!offset) {
+      size = limit;
+    } else {
+      size = limit + offset;
+    }
+
+    const matches = [];
+
+    matches.push(Match(Index('comments_by_post'), req.params.id));
+    if (commentAuthor) {
+      matches.push(Match(Index('comments_by_user'), commentAuthor));
+    }
+    if (title) {
+      matches.push(Match(Index('comments_by_title'), title));
+    }
+    if (content) {
+      matches.push(Match(Index('comments_by_content'), content));
+    }
+
     const { data } = await db.get().query(
       Map(
-        Paginate(Match(Index('comments_by_post'), req.params.id)),
-        Lambda((comment) => Get(comment))
+        Drop(
+          offset,
+          Paginate(Intersection(matches), {
+            size,
+          })
+        ),
+        (comment) => Get(comment)
       )
     );
     res.send(data);
@@ -67,11 +98,19 @@ router.get('/:id/comments', async (req, res, next) => {
 
 // POST post
 router.post('/', async (req, res, next) => {
-  const { postAuthorId, title, content } = req.body;
+  const body = await joi
+    .object({
+      postAuthor: joi.string().trim().required().min(1),
+      title: joi.string().trim().required().min(1),
+      content: joi.string().trim().required().min(1),
+    })
+    .validateAsync(req.body, { abortEarly: false });
+
+  const { postAuthor, title, content } = body;
 
   try {
     const data = {
-      postAuthor: Ref(Collection('users'), postAuthorId),
+      postAuthor: Ref(Collection('users'), postAuthor),
       title,
       content,
       created_at: Now(),
@@ -86,7 +125,15 @@ router.post('/', async (req, res, next) => {
 
 // PUT post
 router.put('/:id', async (req, res, next) => {
-  const { title, content } = req.body;
+  const body = await joi
+    .object({
+      title: joi.string().min(1),
+      content: joi.string().min(1),
+    })
+    .or('title', 'content')
+    .validateAsync(req.body, { abortEarly: false });
+
+  const { title, content } = body;
 
   try {
     const data = {
