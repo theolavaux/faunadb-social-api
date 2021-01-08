@@ -94,8 +94,6 @@ router.get('/:id/comments', async (req, res, next) => {
   }
 });
 
-// + query and pagination
-
 // POST post
 router.post('/', async (req, res, next) => {
   const body = await joi
