@@ -1,6 +1,6 @@
 const express = require('express');
 const faunadb = require('faunadb');
-
+const joi = require('joi');
 const db = require('../database');
 
 const router = express.Router();
@@ -8,7 +8,6 @@ const router = express.Router();
 const {
   Paginate,
   Collection,
-  Lambda,
   Get,
   Ref,
   Now,
@@ -18,15 +17,16 @@ const {
   Map,
 } = faunadb.query;
 
+const schema = joi.object({
+  name: joi.string().trim().required().min(1),
+});
+
 // GET all users
 router.get('/', async (_, res, next) => {
   try {
-    const { data } = await db.get().query(
-      Map(
-        Paginate(Match(Index('all_users'))),
-        Lambda((user) => Get(user))
-      )
-    );
+    const { data } = await db
+      .get()
+      .query(Map(Paginate(Match(Index('all_users'))), (user) => Get(user)));
     res.send(data);
   } catch (e) {
     next(e);
@@ -48,12 +48,13 @@ router.get('/:id', async (req, res, next) => {
 // GET posts by user
 router.get('/:id/posts', async (req, res, next) => {
   try {
-    const { data } = await db.get().query(
-      Map(
-        Paginate(Match(Index('posts_by_user'), req.params.id)),
-        Lambda((post) => Get(post))
-      )
-    );
+    const { data } = await db
+      .get()
+      .query(
+        Map(Paginate(Match(Index('posts_by_user'), req.params.id)), (post) =>
+          Get(post)
+        )
+      );
     res.send(data);
   } catch (e) {
     next(e);
@@ -63,12 +64,13 @@ router.get('/:id/posts', async (req, res, next) => {
 // GET comments by user
 router.get('/:id/comments', async (req, res, next) => {
   try {
-    const { data } = await db.get().query(
-      Map(
-        Paginate(Match(Index('comments_by_user'), req.params.id)),
-        Lambda((post) => Get(post))
-      )
-    );
+    const { data } = await db
+      .get()
+      .query(
+        Map(Paginate(Match(Index('comments_by_user'), req.params.id)), (post) =>
+          Get(post)
+        )
+      );
     res.send(data);
   } catch (e) {
     next(e);
@@ -78,8 +80,10 @@ router.get('/:id/comments', async (req, res, next) => {
 // POST user
 router.post('/', async (req, res, next) => {
   try {
+    const body = await schema.validateAsync(req.body, { abortEarly: false });
+
     const data = {
-      name: req.body.name,
+      name: body.name,
       created_at: Now(),
     };
 
