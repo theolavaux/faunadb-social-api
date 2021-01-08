@@ -138,11 +138,11 @@
         "summary": "Create a new post",
         "parameters": [
           {
-            "name": "postAuthorId",
+            "name": "postAuthor",
             "in": "body",
             "description": "Id of the user that created the post",
             "properties": {
-              "postAuthorId": {
+              "postAuthor": {
                 "type": "string"
               }
             },
@@ -249,6 +249,36 @@
           "required": true,
           "description": "ID of the post that we want to find",
           "type": "string"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "description": "Display x number of results",
+          "type": "string"
+        },
+        {
+          "name": "offset",
+          "in": "path",
+          "description": "Diplay results from position x (included)",
+          "type": "string"
+        },
+        {
+          "name": "commentAuthor",
+          "in": "query",
+          "description": "Filter by comment author",
+          "type": "number"
+        },
+        {
+          "name": "title",
+          "in": "path",
+          "description": "Filter by comment title",
+          "type": "string"
+        },
+        {
+          "name": "content",
+          "in": "query",
+          "description": "Filter by comment content",
+          "type": "string"
         }
       ],
       "get": {
@@ -276,11 +306,11 @@
         "summary": "Create a new comment",
         "parameters": [
           {
-            "name": "commentAuthorId",
+            "name": "commentAuthor",
             "in": "body",
             "description": "Id of the user that created the comment",
             "properties": {
-              "commentAuthorId": {
+              "commentAuthor": {
                 "type": "string"
               }
             },
@@ -291,7 +321,7 @@
             "in": "body",
             "description": "Id of the post that holds this comment",
             "properties": {
-              "targetPostId": {
+              "targetPost": {
                 "type": "string"
               }
             },
