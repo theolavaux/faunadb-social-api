@@ -12,5 +12,7 @@ module.exports = {
   rules: {
     'comma-dangle': 'off',
     'object-curly-newline': 'off',
+    'implicit-arrow-linebreak': 'off',
+    'function-paren-newline': 'off',
   },
 };
