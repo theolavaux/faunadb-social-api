@@ -1,5 +1,6 @@
 const express = require('express');
 const faunadb = require('faunadb');
+const joi = require('joi');
 
 const db = require('../database');
 
@@ -8,7 +9,6 @@ const router = express.Router();
 const {
   Paginate,
   Collection,
-  Lambda,
   Get,
   Ref,
   Now,
@@ -23,12 +23,11 @@ const {
 // GET all comments
 router.get('/', async (_, res, next) => {
   try {
-    const { data } = await db.get().query(
-      Map(
-        Paginate(Match(Index('all_comments'))),
-        Lambda((comment) => Get(comment))
-      )
-    );
+    const { data } = await db
+      .get()
+      .query(
+        Map(Paginate(Match(Index('all_comments'))), (comment) => Get(comment))
+      );
     res.send(data);
   } catch (e) {
     next(e);
@@ -50,12 +49,21 @@ router.get('/:id', async (req, res, next) => {
 
 // POST comment
 router.post('/', async (req, res, next) => {
-  const { commentAuthorId, targetPostId, title, content } = req.body;
+  const body = await joi
+    .object({
+      commentAuthor: joi.string().trim().required().min(1),
+      targetPost: joi.string().trim().required().min(1),
+      title: joi.string().trim().required().min(1),
+      content: joi.string().trim().required().min(1),
+    })
+    .validateAsync(req.body, { abortEarly: false });
+
+  const { commentAuthor, targetPost, title, content } = body;
 
   try {
     const data = {
-      commentAuthor: Ref(Collection('users'), commentAuthorId),
-      targetPost: Ref(Collection('posts'), targetPostId),
+      commentAuthor: Ref(Collection('users'), commentAuthor),
+      targetPost: Ref(Collection('posts'), targetPost),
       title,
       content,
       created_at: Now(),
@@ -70,7 +78,15 @@ router.post('/', async (req, res, next) => {
 
 // PUT comment
 router.put('/:id', async (req, res, next) => {
-  const { title, content } = req.body;
+  const body = await joi
+    .object({
+      title: joi.string().min(1),
+      content: joi.string().min(1),
+    })
+    .or('title', 'content')
+    .validateAsync(req.body, { abortEarly: false });
+
+  const { title, content } = body;
 
   try {
     const data = {
