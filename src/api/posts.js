@@ -64,9 +64,8 @@ router.get('/:id/comments', async (req, res, next) => {
       size = limit + offset;
     }
 
-    const matches = [];
+    const matches = [Match(Index('comments_by_post'), req.params.id)];
 
-    matches.push(Match(Index('comments_by_post'), req.params.id));
     if (commentAuthor) {
       matches.push(Match(Index('comments_by_user'), commentAuthor));
     }
